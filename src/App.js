@@ -1,25 +1,111 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import { Drawer, Button } from "antd";
+import ReactMarkdown from "react-markdown/with-html";
+import axios from 'axios';
+
+import "./App.css";
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      md: "",
+      visible: false,
+      childrenDrawer: false
+    };
+  }
+
+  componentWillMount() {
+    // 通过 gh-pages取得数据
+    axios
+      .get(
+        "https://zk4.github.io/blog-post/README.md"
+      )
+      .then(data => {
+        this.setState({ md: data.data });
+      })
+      .catch(function(err) {
+        console.log("ERR");
+        console.log(err);
+      });
+  }
+  showDrawer = () => {
+    this.setState({
+      visible: true
+    });
+  };
+
+  onClose = () => {
+    this.setState({
+      visible: false
+    });
+  };
+
+  showChildrenDrawer = () => {
+    this.setState({
+      childrenDrawer: true
+    });
+  };
+
+  onChildrenDrawerClose = () => {
+    this.setState({
+      childrenDrawer: false
+    });
+  };
+
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
+      <div>
+        <Button type="primary" onClick={this.showDrawer}>
+          Open drawer
+        </Button>
+        <ReactMarkdown source={this.state.md} escapeHtml={false} />
+
+        <Drawer
+          title="Multi-level drawer"
+          width={520}
+          closable={false}
+          onClose={this.onClose}
+          visible={this.state.visible}
+        >
+          <Button type="primary" onClick={this.showChildrenDrawer}>
+            Two-level drawer
+          </Button>
+          <Drawer
+            title="Two-level Drawer"
+            width={320}
+            closable={false}
+            onClose={this.onChildrenDrawerClose}
+            visible={this.state.childrenDrawer}
           >
-            Learn React
-          </a>
-        </header>
+            This is two-level drawer
+          </Drawer>
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              width: "100%",
+              borderTop: "1px solid #e8e8e8",
+              padding: "10px 16px",
+              textAlign: "right",
+              left: 0,
+              background: "#fff",
+              borderRadius: "0 0 4px 4px"
+            }}
+          >
+            <Button
+              style={{
+                marginRight: 8
+              }}
+              onClick={this.onClose}
+            >
+              Cancel
+            </Button>
+            <Button onClick={this.onClose} type="primary">
+              Submit
+            </Button>
+          </div>
+        </Drawer>
       </div>
     );
   }
